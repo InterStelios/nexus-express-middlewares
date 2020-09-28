@@ -7,15 +7,44 @@ import probe from 'kube-probe';
 import responseTime from 'response-time';
 import timeout from 'connect-timeout';
 
-export function applyCommonMiddlewares(application: ReturnType<typeof express> | Application) {
-  application.use(helmet());
-  application.use(compression());
-  application.use(bodyParser.urlencoded({ extended: true }));
-  application.use(bodyParser.json());
-  application.use(responseTime());
-  application.use(timeout('15s'));
-  probe(application, {
-    readinessURL: '/healthz',
-    livenessURL: '/healthz',
-  });
+type Disabled = {
+  helmet?: boolean;
+  bodyParser?: boolean;
+  responseTime?: boolean;
+  timeout?: boolean;
+  compression?: boolean;
+  healthz?: boolean;
+};
+
+export function applyCommonMiddlewares(
+  application: ReturnType<typeof express> | Application,
+  disabled?: Disabled,
+) {
+  if (!disabled?.helmet) {
+    application.use(helmet());
+  }
+
+  if (!disabled?.bodyParser) {
+    application.use(bodyParser.urlencoded({ extended: true }));
+    application.use(bodyParser.json());
+  }
+
+  if (!disabled?.compression) {
+    application.use(compression());
+  }
+
+  if (!disabled?.responseTime) {
+    application.use(responseTime());
+  }
+
+  if (!disabled?.timeout) {
+    application.use(timeout('15s'));
+  }
+
+  if (!disabled?.healthz) {
+    probe(application, {
+      readinessURL: '/healthz',
+      livenessURL: '/healthz',
+    });
+  }
 }

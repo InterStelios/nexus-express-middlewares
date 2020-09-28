@@ -1,6 +1,6 @@
 /// <reference types="express" />
-declare module "kube-probe" {
-    import { RequestHandler, Application } from "express";
+declare module 'kube-probe' {
+    import { RequestHandler, Application } from 'express';
     interface KubeProbeOptions {
         readinessURL?: string;
         livenessURL?: string;
