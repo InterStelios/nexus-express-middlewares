@@ -14,10 +14,11 @@ type Disabled = {
   timeout?: boolean;
   compression?: boolean;
   healthz?: boolean;
+  version?: boolean;
 };
 
 export function applyCommonMiddlewares(
-  application: ReturnType<typeof express> | Application,
+  application: ReturnType<typeof express>,
   disabled?: Disabled,
 ) {
   if (!disabled?.helmet) {
@@ -45,6 +46,15 @@ export function applyCommonMiddlewares(
     probe(application, {
       readinessURL: '/healthz',
       livenessURL: '/healthz',
+    });
+  }
+
+  if (!disabled?.version) {
+    application.get('/_version', (request, response) => {
+      return response.json({
+        env: process.env.NODE_ENV || 'not_provided',
+        version: process.env.COMMIT_SHA || 'not_provided',
+      });
     });
   }
 }
